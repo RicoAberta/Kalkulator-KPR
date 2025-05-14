@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulasi KPR Profesional</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-blue-700 text-white py-4 shadow">
+    <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold">Simulasi Perhitungan KPR</h1>
+    </div>
+  </header>
+
+  <!-- Intro -->
+  <div class="max-w-5xl mx-auto mt-6 px-4">
+    <img src="https://ajaib.co.id/wp-content/uploads/2019/12/simulasi-kpr-1024x576.jpg" alt="Ilustrasi Perumahan" width="1000">
+    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 hover:shadow-xl transition">
+      <h2 class="text-xl font-bold mb-2">Apa itu KPR?</h2>
+      <p class="text-gray-700">
+        <strong>Kredit Pemilikan Rumah (KPR)</strong> adalah fasilitas pinjaman untuk membeli rumah yang dibayar secara cicilan.
+        Biasanya terdapat dua jenis suku bunga: <strong>bunga tetap (fix)</strong> di awal, dan <strong>bunga mengambang (floating)</strong> setelah periode fix berakhir.
+        Dengan simulasi ini, Anda bisa memperkirakan besarnya cicilan dan total pembayaran berdasarkan parameter yang Anda masukkan.
+      </p>
+    </div>
+  </div>
+
+  <!-- Simulasi Form -->
+  <div class="max-w-5xl mx-auto bg-white p-6 mt-10 rounded-2xl shadow-lg px-4">
+    <h1 class="text-2xl font-bold mb-6 text-center text-blue-700">Simulasi Perhitungan KPR</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label class="font-semibold">Harga Rumah (Rp)</label>
+        <input id="hargaRumah" type="number" class="w-full p-2 border rounded" placeholder="cth: 500000000">
+      </div>
+      <div>
+        <label class="font-semibold">Uang Muka (Rp)</label>
+        <input id="uangMuka" type="number" class="w-full p-2 border rounded" placeholder="cth: 100000000">
+      </div>
+      <div>
+        <label class="font-semibold">Bunga Fix (% per tahun)</label>
+        <input id="bungaFix" type="number" class="w-full p-2 border rounded" placeholder="cth: 5">
+      </div>
+      <div>
+        <label class="font-semibold">Periode Fix (tahun)</label>
+        <input id="tahunFix" type="number" class="w-full p-2 border rounded" placeholder="cth: 3">
+      </div>
+      <div>
+        <label class="font-semibold">Bunga Floating (% per tahun)</label>
+        <input id="bungaFloating" type="number" class="w-full p-2 border rounded" placeholder="cth: 10">
+      </div>
+      <div>
+        <label class="font-semibold">Jangka Waktu Total (tahun)</label>
+        <input id="tahunTotal" type="number" class="w-full p-2 border rounded" placeholder="cth: 15">
+      </div>
+    </div>
+
+    <button onclick="hitungSimulasi()" class="mt-6 w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white py-2 rounded-xl font-semibold shadow hover:from-blue-700 transition duration-200">
+       Hitung Simulasi
+    </button>
+
+    <div id="hasil" class="mt-6 text-gray-800 text-base transition-all duration-300 ease-in-out"></div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-blue-700 text-white py-6 mt-10">
+    <div class="max-w-6xl mx-auto px-4 text-center text-sm">
+      &copy; Program Studi Perbankan. Universitas Gadjah Mada.
+    </div>
+  </footer>
+
+  <script>
+    function hitungSimulasi() {
+      const hargaRumah = parseFloat(document.getElementById('hargaRumah').value);
+      const uangMuka = parseFloat(document.getElementById('uangMuka').value);
+      const bungaFix = parseFloat(document.getElementById('bungaFix').value);
+      const tahunFix = parseFloat(document.getElementById('tahunFix').value);
+      const bungaFloating = parseFloat(document.getElementById('bungaFloating').value);
+      const tahunTotal = parseFloat(document.getElementById('tahunTotal').value);
+
+      const jumlahPinjaman = hargaRumah - uangMuka;
+      const bulanFix = tahunFix * 12;
+      const bulanTotal = tahunTotal * 12;
+      const bulanFloating = bulanTotal - bulanFix;
+
+      const bungaBulananFix = bungaFix / 12 / 100;
+      const bungaBulananFloating = bungaFloating / 12 / 100;
+
+      const angsuranFix = (jumlahPinjaman * bungaBulananFix) / (1 - Math.pow(1 + bungaBulananFix, -bulanTotal));
+      const totalBayarFix = angsuranFix * bulanFix;
+
+      let sisaPokok = jumlahPinjaman;
+      for (let i = 0; i < bulanFix; i++) {
+        const bunga = sisaPokok * bungaBulananFix;
+        const pokok = angsuranFix - bunga;
+        sisaPokok -= pokok;
+      }
+
+      const angsuranFloating = (sisaPokok * bungaBulananFloating) / (1 - Math.pow(1 + bungaBulananFloating, -bulanFloating));
+      const totalBayarFloating = angsuranFloating * bulanFloating;
+
+      const totalAngsuran = totalBayarFix + totalBayarFloating;
+
+      let saran = "";
+      const rasioCicilan = totalAngsuran / hargaRumah;
+
+      if (rasioCicilan > 1.5) {
+        saran = " <b>Catatan:</b> Total cicilan jauh lebih besar dari harga rumah, pertimbangkan mencari bunga lebih rendah atau memperbesar uang muka.";
+      } else if (rasioCicilan > 1.2) {
+        saran = " <b>Catatan:</b> Cicilan relatif besar, pertimbangkan menambah uang muka atau memperpendek tenor.";
+      } else {
+        saran = " <b>Catatan:</b> Skema KPR cukup sehat secara finansial.";
+      }
+
+      document.getElementById("hasil").innerHTML = `
+        <h2 class="text-xl font-semibold mb-2">Hasil Perhitungan</h2>
+        <p>Jumlah Pinjaman: <strong>Rp ${jumlahPinjaman.toLocaleString()}</strong></p>
+        <p>Angsuran FIX: <strong>Rp ${angsuranFix.toFixed(0).toLocaleString()}</strong> /bulan selama ${tahunFix} tahun</p>
+        <p>Angsuran FLOATING: <strong>Rp ${angsuranFloating.toFixed(0).toLocaleString()}</strong> /bulan selama ${tahunTotal - tahunFix} tahun</p>
+        <p>Total Pembayaran Selama KPR: <strong>Rp ${totalAngsuran.toFixed(0).toLocaleString()}</strong></p>
+        <hr class="my-4">
+        ${saran}
+      `;
+    }
+  </script>
+
+</body>
+</html>
